@@ -1,7 +1,6 @@
 import os
 import streamlit as st
-from google import genai
-from google.genai import types
+from google.genai import Client, types
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import pandas as pd
