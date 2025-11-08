@@ -188,7 +188,7 @@ def get_gemini_client():
     api_key = os.getenv('GEMINI_API_KEY')
     if not api_key:
         raise ValueError("GEMINI_API_KEY environment variable is not set")
-    return genai.Client(api_key=api_key)
+    return Client(api_key=api_key)
 
 def generate_travel_plan(origin, destination, start_date, end_date, budget, currency, preferences, num_travelers=1):
     """Generate travel plan using Gemini with Google Search grounding"""
