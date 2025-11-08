@@ -1,6 +1,6 @@
 import os
 import streamlit as st
-from google.genai import Client, types
+import google.generativeai as genai
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import pandas as pd
@@ -194,19 +194,18 @@ def get_gemini_client():
     
     if not api_key:
         raise ValueError("GEMINI_API_KEY is not set in Streamlit secrets or environment variables")
-    return Client(api_key=api_key)
+    
+    # Configure the API key
+    genai.configure(api_key=api_key)
+    return genai.GenerativeModel('gemini-2.0-flash-exp')
 
 def generate_travel_plan(origin, destination, start_date, end_date, budget, currency, preferences, num_travelers=1):
     """Generate travel plan using Gemini with Google Search grounding"""
-    client = get_gemini_client()
+    model = get_gemini_client()
     
-    # Configure grounding tool
-    grounding_tool = types.Tool(
-        google_search=types.GoogleSearch()
-    )
-    
-    config = types.GenerateContentConfig(
-        tools=[grounding_tool]
+    # Configure grounding tool for Google Search
+    grounding_tool = genai.protos.Tool(
+        google_search_retrieval=genai.protos.GoogleSearchRetrieval()
     )
     
     # Format dates for URLs
@@ -338,11 +337,12 @@ def generate_travel_plan(origin, destination, start_date, end_date, budget, curr
     """
     
     # Generate content with grounding
-    response = client.models.generate_content(
-        # model="gemini-2.0-flash-exp",
-        model="gemini-2.5-flash",
-        contents=prompt,
-        config=config,
+    response = model.generate_content(
+        prompt,
+        tools=[grounding_tool],
+        generation_config=genai.types.GenerationConfig(
+            temperature=0.7,
+        )
     )
     
     return response.text
