@@ -185,9 +185,15 @@ st.markdown("""
 # Initialize Gemini client
 @st.cache_resource
 def get_gemini_client():
-    api_key = os.getenv('GEMINI_API_KEY')
+    # Try to get API key from Streamlit secrets first (for Streamlit Cloud)
+    try:
+        api_key = st.secrets.get("GEMINI_API_KEY")
+    except (FileNotFoundError, KeyError):
+        # Fallback to environment variable for local development
+        api_key = os.getenv('GEMINI_API_KEY')
+    
     if not api_key:
-        raise ValueError("GEMINI_API_KEY environment variable is not set")
+        raise ValueError("GEMINI_API_KEY is not set in Streamlit secrets or environment variables")
     return Client(api_key=api_key)
 
 def generate_travel_plan(origin, destination, start_date, end_date, budget, currency, preferences, num_travelers=1):
